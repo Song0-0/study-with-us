@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.swu.mapper.ChatMapper">
+
+	<select id="selectRoomList" resultType="com.swu.vo.TRoom" parameterType="HashMap">
+		SELECT
+			  A.RNO AS rno,        
+			  A.RNAME AS rname,       
+			  A.ROWNER AS rowner,     
+			  A.CATEGORY AS category,       
+			  A.MAX_USER AS maxUser,   
+			  A.CUR_USER AS curUser,   
+			  A.DEL_YN AS delYn,     
+			  A.INSERT_DATE AS insertDate,
+			  A.MODIFY_DATE AS modifyDate,
+			  A.IMAGE_URL AS imageUrl
+		 FROM TROOM A  
+		WHERE A.DEL_YN = '0'
+		<if test="roomName != null and roomName != ''">
+		  AND A.RNAME LIKE CONCAT('%', #{roomName}, '%')
+		</if>
+		<if test="category != '전체'">
+		  AND A.CATEGORY = #{category}
+		</if>
+	</select>
+	
+	<insert id="insertRoomInfo" parameterType="com.swu.vo.TRoom">
+		INSERT INTO TROOM 
+				   (RNO,
+					RNAME,
+					PASSWORD,
+					CATEGORY,
+					ROWNER,
+					MAX_USER,
+					CUR_USER)
+			VALUES (NULL,
+					#{rname},
+					#{password},
+					#{category},
+					#{rowner},
+					#{maxUser},
+					1)
+	</insert>
+	
+	<update id="updateRoomInfo" parameterType="com.swu.vo.TRoom">
+		UPDATE TROOM A
+		   SET A.DEL_YN = '1'
+		 WHERE A.RNO = #{rno}
+	</update>
+	
+	<select id="roomPassword" resultType="hashMap" parameterType="hashMap">
+		SELECT A.RNO,
+		       A.PASSWORD
+		  FROM TROOM A
+		 WHERE A.RNO = #{roomNumber}
+		   AND A.DEL_YN = '0'
+	</select>
+	
+	<select id="selectPwdCheck" resultType="Integer" parameterType="hashMap">
+		SELECT COUNT(A.RNO) AS RNO
+		  FROM TROOM A
+		 WHERE A.RNO = #{roomNumber}
+		   AND A.PASSWORD = #{password}
+		   AND A.DEL_YN = '0'
+	</select>
+	
+	<select id="selectRowner" resultType="String" parameterType="hashMap">
+		SELECT A.ROWNER
+		  FROM TROOM A
+		 WHERE RNO = #{roomNumber}
+		   AND A.DEL_YN = '0'
+	</select>
+	
+</mapper>
